@@ -76,55 +76,12 @@ Find the input noun and verb that cause the program to produce the output 196907
 '''
 
 import unittest
-
-
-class Test(unittest.TestCase):
-    def testProg1(self):
-        self.assertEqual(simExecution([1,9,10,3,2,3,11,0,99,30,40,50]), 
-                         [3500,9,10,70,2,3,11,0,99,30,40,50])
-        
-    def testProg2(self):
-        self.assertEqual(simExecution([1,0,0,0,99]), [2,0,0,0,99])
-        
-    def testProg3(self):
-        self.assertEqual(simExecution([2,3,0,3,99]), [2,3,0,6,99])
-        
-    def testProg4(self):
-        self.assertEqual(simExecution([2,4,4,5,99,0 ]), [2,4,4,5,99,9801])
-        
-    def testProg5(self):
-        self.assertEqual(simExecution([1,1,1,4,99,5,6,0,99]), [30,1,1,4,2,5,6,0,99])
-     
-def simExecution(memory):
-    pc = 0
-    while(True):
-        instr_cache = memory[pc]
-        # decode
-        if instr_cache == 1:
-            # add uses indirect addressing, @c = @a + @b 
-            param_a , param_b, param_c = memory[pc+1:pc+4]
-            memory[param_c] = memory[param_a] + memory[param_b]
-            values_in_instr = 4
-            
-        elif instr_cache == 2:
-            # mul @c = @a * @b 
-            param_a , param_b, param_c = memory[pc+1:pc+4]
-            memory[param_c] = memory[param_a] * memory[param_b]
-            values_in_instr = 4
-            
-        elif instr_cache == 99:
-            break
-        pc += values_in_instr
-    #print(','.join(map(str,memory)))
-    return memory
-
-def intCodeToList(intCodeProg):
-    return [int(x) for x in intCodeProg[0].split(',')]
+from ship_computer import ShipComputer, intCodeToList
 
 def generateOutput(memory, noun, verb):
     memory[1] = noun
     memory[2] = verb    
-    memory = simExecution(memory)
+    memory = ShipComputer(memory).run()
     return memory[0]
 
 def solve(intCodeProg):
