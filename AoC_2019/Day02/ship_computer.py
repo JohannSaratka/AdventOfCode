@@ -3,56 +3,131 @@ Created on 06.12.2019
 
 @author: johann
 '''
-import unittest
+from enum import IntEnum
 
-class Test(unittest.TestCase):
-    def assertProgramExecution(self,initial_memory, expected_memory):
-        ship = ShipComputer(initial_memory)
-        self.assertEqual(ship.run(), 
-                         expected_memory)
-    def testProg1(self):
-        self.assertProgramExecution([1,9,10,3,2,3,11,0,99,30,40,50], 
-                         [3500,9,10,70,2,3,11,0,99,30,40,50])
+class OpCode(IntEnum):
+    ADD = 1
+    MUL = 2
+    RD = 3
+    WRT = 4
+    HLT = 99
+    
+class ParamMode(IntEnum):
+    POSITION = 0
+    IMMIDIATE = 1  
         
-    def testProg2(self):
-        self.assertProgramExecution([1,0,0,0,99], [2,0,0,0,99])
+class Instruction(object):
+    def __init__(self,mode):
+        self.mode = mode        
+        self.operands = list()
         
-    def testProg3(self):
-        self.assertProgramExecution([2,3,0,3,99], [2,3,0,6,99])
+    # Create based on class name:
+    def decode(instr):
+        instructions = { 
+            OpCode.ADD: Add,
+            OpCode.MUL: Multiply,
+            OpCode.RD:  Read,
+            OpCode.WRT: Write,
+            OpCode.HLT: Halt
+            }
+        mode = instr // 100
+        opcode = instr % 100
+        if opcode not in instructions.keys():
+            assert 0, "Bad instruction creation: " + str(opcode)
+        else:
+            return instructions[opcode](mode)
         
-    def testProg4(self):
-        self.assertProgramExecution([2,4,4,5,99,0 ], [2,4,4,5,99,9801])
+    decode = staticmethod(decode)
+            
+    def load_operand(self, processor):
+        if (self.mode % 10) == ParamMode.POSITION:
+            # last operand is destination that is resolved when value is stored
+            if len(self.operands) < (self.num_operands - 1):
+                self.operands.append(processor.memory[processor.fetch()])
+            else:
+                self.operands.append(processor.fetch())
+        elif (self.mode % 10) == ParamMode.IMMIDIATE:
+            self.operands.append(processor.fetch())
         
-    def testProg5(self):
-        self.assertProgramExecution([1,1,1,4,99,5,6,0,99], [30,1,1,4,2,5,6,0,99])
-     
+        self.mode //= 10 
+            
+    def load_done(self):
+        return len(self.operands) == self.num_operands
+    
+    
+class Add(Instruction):
+    num_operands = 3
+
+    def execute(self, processor): 
+        processor.acc = self.operands[0] + self.operands[1]
+        
+    def store(self, processor): 
+        processor.memory[self.operands[2]] = processor.acc      
+
+class Multiply(Instruction):
+    num_operands = 3
+        
+    def execute(self, processor): 
+        processor.acc = self.operands[0] * self.operands[1]
+        
+    def store(self, processor): 
+        processor.memory[self.operands[2]] = processor.acc  
+
+class Read(Instruction):
+    num_operands = 1
+        
+    def execute(self, processor): 
+        pass
+
+    def store(self, processor): 
+        processor.memory[self.operands[0]] = processor.input
+
+class Write(Instruction):
+    num_operands = 1
+        
+    def execute(self, processor): 
+        pass
+    
+    def store(self, processor): 
+        processor.output = processor.memory[self.operands[0]] 
+        
+class Halt(Instruction):    
+    num_operands = 0
+        
+    def execute(self, processor): 
+        processor.run_mode = False
+        
+    def store(self, processor): 
+        pass
+        
 class ShipComputer():
     def __init__(self, program):
         self.pc = 0
+        self.acc = 0
         self.memory = program
+        self.input = None
+        self.output = None
+        self.run_mode = True
         
     def run(self):
-        while(True):
-            # instruction fetch
-            instr_cache = self.memory[self.pc]
-            # decode + execute + store
-            if instr_cache == 1:
-                # add uses indirect addressing, @c = @a + @b 
-                param_a , param_b, param_c = self.memory[self.pc+1:self.pc+4]
-                self.memory[param_c] = self.memory[param_a] + self.memory[param_b]
-                instr_size = 4
-                
-            elif instr_cache == 2:
-                # mul @c = @a * @b 
-                param_a , param_b, param_c = self.memory[self.pc+1:self.pc+4]
-                self.memory[param_c] = self.memory[param_a] * self.memory[param_b]
-                instr_size = 4
-                
-            elif instr_cache == 99:
-                break
-            self.pc += instr_size
+        while(self.run_mode):
+            instr_register = self.fetch()
+            instr = self.decode(instr_register)
+            self.pc += 1
+            while not instr.load_done():
+                instr.load_operand(self)
+                self.pc += 1
+            instr.execute(self)
+            instr.store(self)            
         return self.memory
-
+    
+    def fetch(self):
+        return self.memory[self.pc]
+    
+    def decode(self, instr_register):
+        return Instruction.decode(instr_register)
+    
+        
 def intCodeToList(intCodeProg):
     return [int(x) for x in intCodeProg[0].split(',')]
 
