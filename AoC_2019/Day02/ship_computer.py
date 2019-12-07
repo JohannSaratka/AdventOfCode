@@ -8,99 +8,17 @@ from enum import IntEnum
 class OpCode(IntEnum):
     ADD = 1
     MUL = 2
-    RD = 3
-    WRT = 4
+    LDA = 3
+    STA = 4
     HLT = 99
     
 class ParamMode(IntEnum):
     POSITION = 0
     IMMIDIATE = 1  
+
         
-class Instruction(object):
-    def __init__(self,mode):
-        self.mode = mode        
-        self.operands = list()
-        
-    # Create based on class name:
-    def decode(instr):
-        instructions = { 
-            OpCode.ADD: Add,
-            OpCode.MUL: Multiply,
-            OpCode.RD:  Read,
-            OpCode.WRT: Write,
-            OpCode.HLT: Halt
-            }
-        mode = instr // 100
-        opcode = instr % 100
-        if opcode not in instructions.keys():
-            assert 0, "Bad instruction creation: " + str(opcode)
-        else:
-            return instructions[opcode](mode)
-        
-    decode = staticmethod(decode)
-            
-    def load_operand(self, processor):
-        if (self.mode % 10) == ParamMode.POSITION:
-            # last operand is destination that is resolved when value is stored
-            if len(self.operands) < (self.num_operands - 1):
-                self.operands.append(processor.memory[processor.fetch()])
-            else:
-                self.operands.append(processor.fetch())
-        elif (self.mode % 10) == ParamMode.IMMIDIATE:
-            self.operands.append(processor.fetch())
-        
-        self.mode //= 10 
-            
-    def load_done(self):
-        return len(self.operands) == self.num_operands
+class CPU():
     
-    
-class Add(Instruction):
-    num_operands = 3
-
-    def execute(self, processor): 
-        processor.acc = self.operands[0] + self.operands[1]
-        
-    def store(self, processor): 
-        processor.memory[self.operands[2]] = processor.acc      
-
-class Multiply(Instruction):
-    num_operands = 3
-        
-    def execute(self, processor): 
-        processor.acc = self.operands[0] * self.operands[1]
-        
-    def store(self, processor): 
-        processor.memory[self.operands[2]] = processor.acc  
-
-class Read(Instruction):
-    num_operands = 1
-        
-    def execute(self, processor): 
-        pass
-
-    def store(self, processor): 
-        processor.memory[self.operands[0]] = processor.input
-
-class Write(Instruction):
-    num_operands = 1
-        
-    def execute(self, processor): 
-        pass
-    
-    def store(self, processor): 
-        processor.output = processor.memory[self.operands[0]] 
-        
-class Halt(Instruction):    
-    num_operands = 0
-        
-    def execute(self, processor): 
-        processor.run_mode = False
-        
-    def store(self, processor): 
-        pass
-        
-class ShipComputer():
     def __init__(self, program):
         self.pc = 0
         self.acc = 0
@@ -108,25 +26,82 @@ class ShipComputer():
         self.input = None
         self.output = None
         self.run_mode = True
+        self.r = [0] * 3
         
     def run(self):
         while(self.run_mode):
-            instr_register = self.fetch()
-            instr = self.decode(instr_register)
+            self.ir = self.fetch()
             self.pc += 1
-            while not instr.load_done():
-                instr.load_operand(self)
-                self.pc += 1
-            instr.execute(self)
-            instr.store(self)            
+            fun = self.decode()
+            self.execute(fun)
+            self.store()            
         return self.memory
     
     def fetch(self):
         return self.memory[self.pc]
     
-    def decode(self, instr_register):
-        return Instruction.decode(instr_register)
-    
+    def decode(self):        
+        mode = self.ir // 100
+        opcode = self.ir % 100
+        
+        try:
+            fun, num_operands = self.instruction_set[opcode]
+            
+        except KeyError:
+            raise KeyError("Bad instruction creation: " + str(opcode))
+        
+        self.load_registers(num_operands, mode)
+        return fun 
+   
+    def load_registers(self, num_operands, mode):        
+        for reg_idx in range(num_operands): 
+            self.r[reg_idx] = (self.fetch(), (mode % 10))
+            
+            mode //= 10
+            self.pc += 1
+            
+    def execute(self, fun):
+        fun(self)
+        
+    def store(self):
+        if self.dst is not None:
+            value, _ = self.dst          
+            self.memory[value] = self.acc
+            
+    def get_data(self,reg):
+        value, mode = reg
+        if mode == ParamMode.POSITION:
+            return self.memory[value]
+        elif mode == ParamMode.IMMIDIATE:
+            return value
+        
+    def add(self): 
+        self.acc = self.get_data(self.r[0]) + self.get_data(self.r[1])
+        self.dst = self.r[2]
+
+    def mul(self): 
+        self.acc = self.get_data(self.r[0]) * self.get_data(self.r[1])
+        self.dst = self.r[2]
+        
+    def lda(self): 
+        self.acc = self.input
+        self.dst = self.r[0]
+
+    def sta(self): 
+        self.output = self.get_data(self.r[0])
+        self.dst = None
+
+    def hlt(self): 
+        self.run_mode = False
+        self.dst = None
+        
+    instruction_set = { 
+            OpCode.ADD: (add,3),
+            OpCode.MUL: (mul,3),
+            OpCode.LDA: (lda,1),
+            OpCode.STA: (sta,1),
+            OpCode.HLT: (hlt,0)
+            }
         
 def intCodeToList(intCodeProg):
     return [int(x) for x in intCodeProg[0].split(',')]

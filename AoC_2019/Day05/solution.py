@@ -94,16 +94,10 @@ What is the diagnostic code for system ID 5?
 
 '''
 
-import unittest
-from AoC_2019.Day02.ship_computer import ShipComputer,intCodeToList
+from AoC_2019.Day02.ship_computer import CPU,intCodeToList
 
-class Test(unittest.TestCase):
-    def testWirePath1(self):
-        self.assertEqual(solve(['3,0,4,0,99','U7,R6,D4,L4']),6)
-        
-        
 def solve(intCodeProg): 
-    processor = ShipComputer(intCodeToList(intCodeProg))
+    processor = CPU(intCodeToList(intCodeProg))
     processor.input = 1
     processor.run()
     return processor.output

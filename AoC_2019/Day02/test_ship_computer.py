@@ -8,7 +8,7 @@ import ship_computer
 
 class Test(unittest.TestCase):
     def assertProgramExecution(self,initial_memory, expected_memory):
-        ship = ship_computer.ShipComputer(initial_memory)
+        ship = ship_computer.CPU(initial_memory)
         self.assertEqual(ship.run(), expected_memory)
         
     def testProg1(self):
@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         self.assertProgramExecution([1,1,1,4,99,5,6,0,99], [30,1,1,4,2,5,6,0,99])
         
     def testInputOutput(self):
-        ship = ship_computer.ShipComputer([3,0,4,0,99])
+        ship = ship_computer.CPU([3,0,4,0,99])
         ship.input = 'a'
         self.assertEqual(ship.output, None)
         self.assertEqual(ship.run(), ['a',0,4,0,99])

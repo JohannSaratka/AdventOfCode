@@ -76,12 +76,12 @@ Find the input noun and verb that cause the program to produce the output 196907
 '''
 
 import unittest
-from ship_computer import ShipComputer, intCodeToList
+from ship_computer import CPU, intCodeToList
 
 def generateOutput(memory, noun, verb):
     memory[1] = noun
     memory[2] = verb    
-    memory = ShipComputer(memory).run()
+    memory = CPU(memory).run()
     return memory[0]
 
 def solve(intCodeProg):
