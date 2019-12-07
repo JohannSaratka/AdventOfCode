@@ -102,8 +102,11 @@ def solve(intCodeProg):
     processor.run()
     return processor.output
 
-def solvePartTwo(memory):        
-    return False
+def solvePartTwo(intCodeProg):        
+    processor = CPU(intCodeToList(intCodeProg))
+    processor.input = 5
+    processor.run()
+    return processor.output
 
 if __name__ == "__main__":
     with open("input.txt",'r') as inFile:

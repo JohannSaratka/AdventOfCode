@@ -7,9 +7,15 @@ import unittest
 import ship_computer
 
 class Test(unittest.TestCase):
-    def assertProgramExecution(self,initial_memory, expected_memory):
+    def assertProgramExecution(self, initial_memory, expected_memory):
         ship = ship_computer.CPU(initial_memory)
         self.assertEqual(ship.run(), expected_memory)
+    
+    def assertGivenInputExpectedOutput(self, initial_memory, given_input, expected_output):
+        ship = ship_computer.CPU(initial_memory)
+        ship.input = given_input
+        ship.run()
+        self.assertEqual(ship.output, expected_output)
         
     def testProg1(self):
         self.assertProgramExecution([1,9,10,3,2,3,11,0,99,30,40,50], 
@@ -27,18 +33,45 @@ class Test(unittest.TestCase):
     def testProg5(self):
         self.assertProgramExecution([1,1,1,4,99,5,6,0,99], [30,1,1,4,2,5,6,0,99])
         
-    def testInputOutput(self):
-        ship = ship_computer.CPU([3,0,4,0,99])
-        ship.input = 'a'
-        self.assertEqual(ship.output, None)
-        self.assertEqual(ship.run(), ['a',0,4,0,99])
-        self.assertEqual(ship.output, 'a')
+    def testInputToOutput(self):
+        self.assertGivenInputExpectedOutput([3,0,4,0,99],'A','A')
         
     def testParameterModes(self):
         self.assertProgramExecution([1002,4,3,4,33], [1002,4,3,4,99])
+    
+    def testInputEqualToEightPositionMode(self):
+        self.assertGivenInputExpectedOutput([3,9,8,9,10,9,4,9,99,-1,8],8,1)
+        self.assertGivenInputExpectedOutput([3,9,8,9,10,9,4,9,99,-1,8],4,0)
+        
+    def testInputLessThanEightPositionMode(self):
+        self.assertGivenInputExpectedOutput([3,9,7,9,10,9,4,9,99,-1,8],8,0)
+        self.assertGivenInputExpectedOutput([3,9,7,9,10,9,4,9,99,-1,8],4,1)
+        
+    def testInputEqualToEightImmidiateMode(self):
+        self.assertGivenInputExpectedOutput([3,3,1108,-1,8,3,4,3,99],8,1)
+        self.assertGivenInputExpectedOutput([3,3,1108,-1,8,3,4,3,99],4,0)
+        
+    def testInputLessThanEightImmidiateMode(self):
+        self.assertGivenInputExpectedOutput([3,3,1107,-1,8,3,4,3,99],8,0)
+        self.assertGivenInputExpectedOutput([3,3,1107,-1,8,3,4,3,99],4,1)
+    
+    def testInputEqualZeroWithJumpPositionMode(self):
+        self.assertGivenInputExpectedOutput([3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9],0,0)
+        self.assertGivenInputExpectedOutput([3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9],4,1)
 
-
-
+    def testInputEqualZeroWithJumpImmediateMode(self):
+        self.assertGivenInputExpectedOutput([3,3,1105,-1,9,1101,0,0,12,4,12,99,1],0,0)
+        self.assertGivenInputExpectedOutput([3,3,1105,-1,9,1101,0,0,12,4,12,99,1],4,1)
+        
+    def testLargerExample(self):
+        program = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+                   1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
+                   999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]
+        
+        self.assertGivenInputExpectedOutput(program, 4, 999)
+        self.assertGivenInputExpectedOutput(program, 8, 1000)
+        self.assertGivenInputExpectedOutput(program, 12, 1001)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

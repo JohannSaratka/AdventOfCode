@@ -10,6 +10,10 @@ class OpCode(IntEnum):
     MUL = 2
     LDA = 3
     STA = 4
+    JNZ = 5
+    JEZ = 6
+    LT = 7
+    EQU = 8
     HLT = 99
     
 class ParamMode(IntEnum):
@@ -90,7 +94,29 @@ class CPU():
     def sta(self): 
         self.output = self.get_data(self.r[0])
         self.dst = None
-
+        
+    def jnz(self):
+        if (self.get_data(self.r[0]) != 0):
+            self.pc = self.get_data(self.r[1])
+            
+    def jez(self):
+        if (self.get_data(self.r[0]) == 0):
+            self.pc = self.get_data(self.r[1])
+    
+    def lt(self):
+        if (self.get_data(self.r[0]) < self.get_data(self.r[1])):
+            self.acc = 1
+        else:
+            self.acc = 0
+        self.dst = self.r[2]
+            
+    def equ(self):
+        if (self.get_data(self.r[0]) == self.get_data(self.r[1])):
+            self.acc = 1
+        else:
+            self.acc = 0
+        self.dst = self.r[2]
+        
     def hlt(self): 
         self.run_mode = False
         self.dst = None
@@ -100,6 +126,10 @@ class CPU():
             OpCode.MUL: (mul,3),
             OpCode.LDA: (lda,1),
             OpCode.STA: (sta,1),
+            OpCode.JNZ: (jnz,2),
+            OpCode.JEZ: (jez,2),            
+            OpCode.LT:  (lt,3),
+            OpCode.EQU: (equ,3),
             OpCode.HLT: (hlt,0)
             }
         
