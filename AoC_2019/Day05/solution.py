@@ -51,7 +51,6 @@ Finally, the program will output a diagnostic code and immediately halt. This fi
 After providing 1 to the only input instruction and passing all the tests, what diagnostic code does the program produce?
 
 --- Part Two ---
---- Part Two ---
 
 The air conditioner comes online! Its cold air feels good for a while, but then the TEST alarms start to go off. Since the air conditioner can't vent its heat anywhere but back into the spacecraft, it's actually making the air inside the ship warmer.
 
@@ -98,13 +97,13 @@ from AoC_2019.Day02.ship_computer import CPU,intCodeToList
 
 def solve(intCodeProg): 
     processor = CPU(intCodeToList(intCodeProg))
-    processor.input = 1
+    processor.set_input(1)
     processor.run()
     return processor.output
 
 def solvePartTwo(intCodeProg):        
     processor = CPU(intCodeToList(intCodeProg))
-    processor.input = 5
+    processor.set_input(5)
     processor.run()
     return processor.output
 

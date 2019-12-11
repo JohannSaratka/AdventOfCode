@@ -4,6 +4,7 @@ Created on 06.12.2019
 @author: johann
 '''
 from enum import IntEnum
+from collections import namedtuple
 
 class OpCode(IntEnum):
     ADD = 1
@@ -20,17 +21,24 @@ class ParamMode(IntEnum):
     POSITION = 0
     IMMIDIATE = 1  
 
-        
-class CPU():
+RegisterEntry = namedtuple('RegisterEntry', ['value', 'mode'])
+
+class CPU(object):
     
     def __init__(self, program):
         self.pc = 0
         self.acc = 0
-        self.memory = program
-        self.input = None
+        self.memory = program.copy()
+        self._input = []
         self.output = None
         self.run_mode = True
         self.r = [0] * 3
+    
+    def get_input(self):
+        return self._input.pop(0)
+
+    def set_input(self, value):
+        self._input.append(value)
         
     def run(self):
         while(self.run_mode):
@@ -59,7 +67,7 @@ class CPU():
    
     def load_registers(self, num_operands, mode):        
         for reg_idx in range(num_operands): 
-            self.r[reg_idx] = (self.fetch(), (mode % 10))
+            self.r[reg_idx] = RegisterEntry(self.fetch(), (mode % 10))
             
             mode //= 10
             self.pc += 1
@@ -69,16 +77,14 @@ class CPU():
         
     def store(self):
         if self.dst is not None:
-            value, _ = self.dst          
-            self.memory[value] = self.acc
+            self.memory[self.dst.value] = self.acc
             
     def get_data(self,reg):
-        value, mode = reg
-        if mode == ParamMode.POSITION:
-            return self.memory[value]
-        elif mode == ParamMode.IMMIDIATE:
-            return value
-        
+        if reg.mode == ParamMode.POSITION:
+            return self.memory[reg.value]
+        elif reg.mode == ParamMode.IMMIDIATE:
+            return reg.value
+    
     def add(self): 
         self.acc = self.get_data(self.r[0]) + self.get_data(self.r[1])
         self.dst = self.r[2]
@@ -88,7 +94,7 @@ class CPU():
         self.dst = self.r[2]
         
     def lda(self): 
-        self.acc = self.input
+        self.acc = self.get_input()
         self.dst = self.r[0]
 
     def sta(self): 

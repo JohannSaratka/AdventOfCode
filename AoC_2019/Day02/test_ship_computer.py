@@ -13,7 +13,7 @@ class Test(unittest.TestCase):
     
     def assertGivenInputExpectedOutput(self, initial_memory, given_input, expected_output):
         ship = ship_computer.CPU(initial_memory)
-        ship.input = given_input
+        ship.set_input(given_input)
         ship.run()
         self.assertEqual(ship.output, expected_output)
         
