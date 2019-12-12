@@ -99,13 +99,13 @@ def solve(intCodeProg):
     processor = CPU(intCodeToList(intCodeProg))
     processor.set_input(1)
     processor.run()
-    return processor.output
+    return processor.get_output()
 
 def solvePartTwo(intCodeProg):        
     processor = CPU(intCodeToList(intCodeProg))
     processor.set_input(5)
     processor.run()
-    return processor.output
+    return processor.get_output()
 
 if __name__ == "__main__":
     with open("input.txt",'r') as inFile:

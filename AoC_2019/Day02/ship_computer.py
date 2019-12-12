@@ -15,11 +15,13 @@ class OpCode(IntEnum):
     JEZ = 6
     LT = 7
     EQU = 8
+    ARB = 9
     HLT = 99
     
 class ParamMode(IntEnum):
     POSITION = 0
-    IMMIDIATE = 1  
+    IMMIDIATE = 1
+    RELATIVE = 2
 
 RegisterEntry = namedtuple('RegisterEntry', ['value', 'mode'])
 
@@ -28,17 +30,27 @@ class CPU(object):
     def __init__(self, program):
         self.pc = 0
         self.acc = 0
-        self.memory = program.copy()
+        self.memory = {key:value for key,value in enumerate(program)}
         self._input = []
-        self.output = None
+        self._output = []
         self.run_mode = True
         self.r = [0] * 3
-    
+        self.base = 0
+                    
     def get_input(self):
         return self._input.pop(0)
 
     def set_input(self, value):
         self._input.append(value)
+        
+    def get_output(self):
+        if len(self._output) == 1:
+            return self._output.pop(0)
+        else:
+            return self._output
+
+    def set_output(self, value):
+        self._output.append(value)
         
     def run(self):
         while(self.run_mode):
@@ -47,7 +59,7 @@ class CPU(object):
             fun = self.decode()
             self.execute(fun)
             self.store()            
-        return self.memory
+        return [self.memory[key] for key in sorted(self.memory.keys())]
     
     def fetch(self):
         return self.memory[self.pc]
@@ -77,14 +89,22 @@ class CPU(object):
         
     def store(self):
         if self.dst is not None:
-            self.memory[self.dst.value] = self.acc
+            self.set_data(self.dst)
             
-    def get_data(self,reg):
+    def get_data(self, reg):
         if reg.mode == ParamMode.POSITION:
-            return self.memory[reg.value]
+            return self.memory.get(reg.value, 0)
         elif reg.mode == ParamMode.IMMIDIATE:
             return reg.value
-    
+        elif reg.mode == ParamMode.RELATIVE:
+            return self.memory.get(reg.value + self.base, 0)
+        
+    def set_data(self, reg):
+        if reg.mode == ParamMode.POSITION:
+            self.memory[reg.value] = self.acc
+        elif reg.mode == ParamMode.RELATIVE:
+            self.memory[reg.value + self.base] = self.acc
+            
     def add(self): 
         self.acc = self.get_data(self.r[0]) + self.get_data(self.r[1])
         self.dst = self.r[2]
@@ -98,7 +118,7 @@ class CPU(object):
         self.dst = self.r[0]
 
     def sta(self): 
-        self.output = self.get_data(self.r[0])
+        self.set_output(self.get_data(self.r[0]))
         self.dst = None
         
     def jnz(self):
@@ -123,6 +143,10 @@ class CPU(object):
             self.acc = 0
         self.dst = self.r[2]
         
+    def arb(self): 
+        self.base += self.get_data(self.r[0])
+        self.dst = None
+        
     def hlt(self): 
         self.run_mode = False
         self.dst = None
@@ -136,6 +160,7 @@ class CPU(object):
             OpCode.JEZ: (jez,2),            
             OpCode.LT:  (lt,3),
             OpCode.EQU: (equ,3),
+            OpCode.ARB: (arb,1),
             OpCode.HLT: (hlt,0)
             }
         

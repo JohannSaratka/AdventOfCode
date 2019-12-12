@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
         ship = ship_computer.CPU(initial_memory)
         ship.set_input(given_input)
         ship.run()
-        self.assertEqual(ship.output, expected_output)
+        self.assertEqual(ship.get_output(), expected_output)
         
     def testProg1(self):
         self.assertProgramExecution([1,9,10,3,2,3,11,0,99,30,40,50], 
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         self.assertGivenInputExpectedOutput([3,3,1105,-1,9,1101,0,0,12,4,12,99,1],0,0)
         self.assertGivenInputExpectedOutput([3,3,1105,-1,9,1101,0,0,12,4,12,99,1],4,1)
         
-    def testLargerExample(self):
+    def testMoreComplexExample(self):
         program = [3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
                    1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
                    999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99]
@@ -71,6 +71,21 @@ class Test(unittest.TestCase):
         self.assertGivenInputExpectedOutput(program, 4, 999)
         self.assertGivenInputExpectedOutput(program, 8, 1000)
         self.assertGivenInputExpectedOutput(program, 12, 1001)
+        
+    def testOutputQuine(self):
+        ship = ship_computer.CPU([109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99])
+        ship.run()
+        self.assertEqual(ship.get_output(), [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99])
+        
+    def testOutput16Digits(self):
+        ship = ship_computer.CPU([1102,34915192,34915192,7,4,7,99,0])
+        ship.run()
+        self.assertEqual(ship.get_output(), 34915192*34915192)
+        
+    def testLargeNumber(self):
+        ship = ship_computer.CPU([104,1125899906842624,99])
+        ship.run()
+        self.assertEqual(ship.get_output(), 1125899906842624)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

@@ -87,8 +87,8 @@ def solve(intCodeProg):
             amplifier.set_input(phase_setting[x])
             amplifier.set_input(next_amp_in)
             amplifier.run()
-            next_amp_in = amplifier.output
-        max_out = max(max_out, amplifier.output)
+            next_amp_in = amplifier.get_output()
+        max_out = max(max_out, next_amp_in)
     return max_out
 
 def solvePartTwo(intCodeProg):
@@ -112,10 +112,10 @@ def solvePartTwo(intCodeProg):
                     amp.run()
                 except IndexError:
                     amp.pc -= 2 
-                next_amp_in = amp.output
+                next_amp_in = amp.get_output()
             
             
-        max_out = max(max_out, amplifiers[-1].output)
+        max_out = max(max_out, next_amp_in)
     return max_out
 
 if __name__ == "__main__":
