@@ -64,10 +64,18 @@ Before you deploy the robot, you should probably have an estimate of the area it
 
 Build a new emergency hull painting robot and run the Intcode program on it. How many panels does it paint at least once?
 
+--- Part Two ---
+
+You're not sure what it's trying to paint, but it's definitely not a registration identifier. The Space Police are getting impatient.
+
+Checking your external ship cameras again, you notice a white panel marked "emergency hull painting robot starting panel". The rest of the panels are still black, but it looks like the robot was expecting to start on a white panel, not a black one.
+
+Based on the Space Law Space Brochure that the Space Police attached to one of your windows, a valid registration identifier is always eight capital letters. After starting the robot on a single white panel instead, what registration identifier does it paint on your hull?
+
 '''
 
-from AoC_2019.Day02.ship_computer import CPU,intCodeToList
-from _collections import defaultdict
+from AoC_2019.common.ship_computer import CPU, intCodeToList
+from collections import defaultdict
 from enum import IntFlag
 import unittest
 
@@ -75,24 +83,24 @@ class Test(unittest.TestCase):
     def testRobotTurnLeft(self):
         testRobot = Robot([0])
         testRobot.turn(0)
-        self.assertEqual(testRobot.direction,Direction.LEFT)        
+        self.assertEqual(testRobot.direction, Direction.LEFT)        
         testRobot.turn(0)
-        self.assertEqual(testRobot.direction,Direction.DOWN)        
+        self.assertEqual(testRobot.direction, Direction.DOWN)        
         testRobot.turn(0)
-        self.assertEqual(testRobot.direction,Direction.RIGHT)        
+        self.assertEqual(testRobot.direction, Direction.RIGHT)        
         testRobot.turn(0)
-        self.assertEqual(testRobot.direction,Direction.UP)
+        self.assertEqual(testRobot.direction, Direction.UP)
         
     def testRobotTurnRight(self):
         testRobot = Robot([0])
         testRobot.turn(1)
-        self.assertEqual(testRobot.direction,Direction.RIGHT)
+        self.assertEqual(testRobot.direction, Direction.RIGHT)
         testRobot.turn(1)
-        self.assertEqual(testRobot.direction,Direction.DOWN)        
+        self.assertEqual(testRobot.direction, Direction.DOWN)        
         testRobot.turn(1)
-        self.assertEqual(testRobot.direction,Direction.LEFT)
+        self.assertEqual(testRobot.direction, Direction.LEFT)
         testRobot.turn(1)
-        self.assertEqual(testRobot.direction,Direction.UP)
+        self.assertEqual(testRobot.direction, Direction.UP)
         
 class Direction(IntFlag):
     UP = 1
@@ -122,7 +130,7 @@ class Robot(object):
         self.step = 0
         
     def provide_panel(self):
-        return self.ship_hull[(self.pos[0],self.pos[1])]
+        return self.ship_hull[(self.pos[0], self.pos[1])]
     
     def set_output(self,out):
         if self.step == 0:
@@ -140,7 +148,7 @@ class Robot(object):
             self.direction <<= 1
             
     def paint(self, color):
-        self.ship_hull[(self.pos[0],self.pos[1])] = color
+        self.ship_hull[(self.pos[0], self.pos[1])] = color
     
     def move(self):
         if self.direction == Direction.UP:
@@ -152,18 +160,18 @@ class Robot(object):
         elif self.direction == Direction.LEFT:
             self.pos[0] -= 1
             
-def draw_hull(hull):
-    hull_coords = hull.keys()
-    max_x = max(hull_coords,key=lambda coord: coord[0])[0]
-    max_y = max(hull_coords,key=lambda coord: coord[1])[1]
-    hull_drawing = [''] * (max_y+1)
-    for x in range(max_x + 1):
-        for y in range(max_y + 1):
-            if hull[(x,y)] == 1:
-                hull_drawing[y] += '#'
-            else:
-                hull_drawing[y] += ' '
-    return ("\n".join(hull_drawing))
+    def draw_hull(self):
+        hull_coords = self.ship_hull.keys()
+        max_x = max(hull_coords, key = lambda coord: coord[0])[0]
+        max_y = max(hull_coords, key = lambda coord: coord[1])[1]
+        hull_drawing = [''] * (max_y+1)
+        for x in range(max_x + 1):
+            for y in range(max_y + 1):
+                if self.ship_hull[(x,y)] == 1:
+                    hull_drawing[y] += '#'
+                else:
+                    hull_drawing[y] += ' '
+        return ("\n".join(hull_drawing))
     
 def solve(intCodeProg): 
     hull_painter = Robot(intCodeToList(intCodeProg))
@@ -173,7 +181,7 @@ def solve(intCodeProg):
 def solvePartTwo(intCodeProg):
     hull_painter = Robot(intCodeToList(intCodeProg), 1)
     hull_painter.brain.run()
-    return draw_hull(hull_painter.ship_hull)
+    return hull_painter.draw_hull()
 
 if __name__ == "__main__":
     with open("input.txt",'r') as inFile:
