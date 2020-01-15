@@ -75,8 +75,7 @@ Find the input noun and verb that cause the program to produce the output 196907
 
 '''
 
-import unittest
-from ship_computer import CPU, intCodeToList
+from AoC_2019.common.ship_computer import CPU, intCodeToList
 
 def generateOutput(memory, noun, verb):
     memory[1] = noun

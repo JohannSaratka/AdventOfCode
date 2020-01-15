@@ -93,13 +93,13 @@ What is the diagnostic code for system ID 5?
 
 '''
 
-from AoC_2019.Day02.ship_computer import CPU,intCodeToList
+from AoC_2019.common.ship_computer import CPU,intCodeToList
 
 def solve(intCodeProg): 
     processor = CPU(intCodeToList(intCodeProg))
     processor.set_input(1)
     processor.run()
-    return processor.get_output()
+    return processor.get_output()[-1]
 
 def solvePartTwo(intCodeProg):        
     processor = CPU(intCodeToList(intCodeProg))

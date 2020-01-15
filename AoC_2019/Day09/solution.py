@@ -40,7 +40,7 @@ Once your Intcode computer is fully functional, the BOOST program should report 
 
 '''
 
-from AoC_2019.Day02.ship_computer import CPU, intCodeToList
+from AoC_2019.common.ship_computer import CPU, intCodeToList
 
 def solve(intCodeProg): 
     processor = CPU(intCodeToList(intCodeProg))

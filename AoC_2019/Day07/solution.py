@@ -51,7 +51,7 @@ Try every combination of phase settings on the amplifiers. What is the highest s
 import unittest
 import itertools
 import sys
-from AoC_2019.Day02.ship_computer import CPU,intCodeToList
+from AoC_2019.common.ship_computer import CPU,intCodeToList
 
 class Test(unittest.TestCase):
     def testMaxThrusterCheck1(self):
