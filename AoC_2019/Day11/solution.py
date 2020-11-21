@@ -160,7 +160,7 @@ class Robot(object):
         elif self.direction == Direction.LEFT:
             self.pos[0] -= 1
             
-    def draw_hull(self):
+    def draw_screen(self):
         hull_coords = self.ship_hull.keys()
         max_x = max(hull_coords, key = lambda coord: coord[0])[0]
         max_y = max(hull_coords, key = lambda coord: coord[1])[1]
@@ -181,7 +181,7 @@ def solve(intCodeProg):
 def solvePartTwo(intCodeProg):
     hull_painter = Robot(intCodeToList(intCodeProg), 1)
     hull_painter.brain.run()
-    return hull_painter.draw_hull()
+    return hull_painter.draw_screen()
 
 if __name__ == "__main__":
     with open("input.txt",'r') as inFile:
