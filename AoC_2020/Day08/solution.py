@@ -136,29 +136,29 @@ class Test(unittest.TestCase):
         "jmp -4",
         "acc +6"]
 
-    def test_can_contain_shiny_gold(self):
+    def test_find_loop(self):
         self.assertEqual(solve(self.boot_code), (5, False))
 
-    def test_count_contain_shiny_gold1(self):
+    def test_find_correction(self):
         self.assertEqual(solve_part_two(self.boot_code), 8)
 
 
 def solve(boot_code):
-    pc = 0
+    prog_count = 0
     visited = list()
     acc = 0
-    while pc not in visited:
-        if pc == len(boot_code):
+    while prog_count not in visited:
+        if prog_count == len(boot_code):
             break
-        operation, argument = boot_code[pc].split(" ")
-        visited.append(pc)
+        operation, argument = boot_code[prog_count].split(" ")
+        visited.append(prog_count)
         if operation == "acc":
             acc += int(argument)
-            pc += 1
+            prog_count += 1
         elif operation == "jmp":
-            pc += int(argument)
+            prog_count += int(argument)
         elif operation == "nop":
-            pc += 1
+            prog_count += 1
     else:
         return acc, False
     return acc, True
@@ -177,7 +177,6 @@ def solve_part_two(boot_code):
         if terminates:
             break
     return acc
-
 
 
 if __name__ == "__main__":
