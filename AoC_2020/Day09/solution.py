@@ -88,6 +88,44 @@ in this contiguous range; in this example, these are 15 and 47, producing 62.
 
 What is the encryption weakness in your XMAS-encrypted list of numbers?
 
+--- Part Two ---
+
+The final step in breaking the XMAS encryption relies on the invalid number you
+just found: you must find a contiguous set of at least two numbers in your list
+which sum to the invalid number from step 1.
+
+Again consider the above example:
+
+35
+20
+15
+25
+47
+40
+62
+55
+65
+95
+102
+117
+150
+182
+127
+219
+299
+277
+309
+576
+
+In this list, adding up all of the numbers from 15 through 40 produces the
+invalid number from step 1, 127. (Of course, the contiguous set of numbers in
+your actual list might be much longer.)
+
+To find the encryption weakness, add together the smallest and largest number
+in this contiguous range; in this example, these are 15 and 47, producing 62.
+
+What is the encryption weakness in your XMAS-encrypted list of numbers?
+
 '''
 
 import unittest
@@ -132,7 +170,7 @@ def solve(num_series, preamble_len):
         current = num_series[start + preamble_len]
         options = list()
         for value in previous:
-            if current != 2*value and current > value:
+            if current != 2 * value and current > value:
                 options.append(current - value)
         if not any(x in previous for x in options):
             broke_rule = current
@@ -142,9 +180,23 @@ def solve(num_series, preamble_len):
 
 def solve_part_two(num_series, preamble_len):
     goal = solve(num_series, preamble_len)
-    # index of first value that is greater
-    pass
+    num_series = list(map(int, num_series))
 
+    first = 0
+    last = preamble_len
+    sum_to_number = sum(num_series[first:last])
+
+    while True:
+        sum_to_number += num_series[last]
+        while sum_to_number > goal:
+            sum_to_number -= num_series[first]
+            first += 1
+        if goal == sum_to_number:
+            break
+        last += 1
+    small = min(num_series[first:last])
+    large = max(num_series[first:last])
+    return small + large
 
 
 if __name__ == "__main__":
