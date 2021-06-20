@@ -173,7 +173,6 @@ cubes are left in the active state after the sixth cycle?
 
 import unittest
 import itertools
-from typing import Tuple
 
 
 class Test(unittest.TestCase):
@@ -191,25 +190,28 @@ class Test(unittest.TestCase):
         self.assertEqual(solve_part_two(starting_map), 848)
 
 
-class CubeMap(dict):
-    def get_neighbor(self, axis):
-        return (axis - 1, axis, axis + 1)
+def get_neighbor(axis):
+    return (axis - 1, axis, axis + 1)
 
-    def get_all_neighbors(self, cube):
-        ''' get neighboring coordinates for all axis, i.e. (x-1, x, x+1)'''
-        return tuple(self.get_neighbor(val) for val in cube)
+
+def get_all_neighbors(cube):
+    ''' get neighboring coordinates for all axis, i.e. (x-1, x, x+1)'''
+    return tuple(get_neighbor(val) for val in cube)
+
+
+class CubeMap(dict):
 
     def get_candidates(self):
         candidates = set()
         for cube in self.keys():
-            coords = self.get_all_neighbors(cube)
+            coords = get_all_neighbors(cube)
             candidates.update(set(itertools.product(*coords)))
         return candidates
 
     def check_active(self, cube):
         total = 0
 
-        for neighbor_cube in itertools.product(*self.get_all_neighbors(cube)):
+        for neighbor_cube in itertools.product(*get_all_neighbors(cube)):
             if neighbor_cube == cube:
                 # only neighbors are relevant
                 continue
